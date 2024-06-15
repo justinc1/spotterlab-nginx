@@ -1,0 +1,28 @@
+- name: Fail if molecule group is missing
+  hosts: localhost
+  tasks:
+    - name: Print some info
+      ansible.builtin.debug:
+        msg: "{{ groups }}"
+
+    - name: Assert group existence
+      ansible.builtin.assert:
+        that: "'molecule' in groups"
+        fail_msg: |
+          molecule group was not found inside inventory groups: {{ groups }}
+
+- name: Side-effect
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Stop a container
+      containers.podman.podman_container:
+        name: "{{ item.name }}"
+        state: stopped
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Start a container
+      containers.podman.podman_container:
+        name: "{{ item.name }}"
+        state: started
+      loop: "{{ molecule_yml.platforms }}"

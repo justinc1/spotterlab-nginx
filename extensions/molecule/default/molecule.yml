@@ -1,0 +1,26 @@
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+platforms:
+  - name: molecule-rocky9
+    # https://github.com/eniocarboni/docker-rockylinux-systemd
+    image: docker.io/eniocarboni/docker-rockylinux-systemd:9
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    command: "/usr/sbin/init"
+  # # ubi images also make sense
+  # - name: molecule-ubi8
+  #   image: ubi8/ubi-ini
+  #   volumes:
+  #     - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  #   privileged: true
+  #   command: "/usr/sbin/init"
+driver:
+  options:
+    managed: false
+    login_cmd_template: "podman exec -ti {instance} bash"
+    ansible_connection_options:
+      ansible_connection: podman

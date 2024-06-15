@@ -1,0 +1,44 @@
+- name: Fail if molecule group is missing
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Print some info
+      ansible.builtin.debug:
+        msg: "{{ groups }}"
+
+    - name: Assert group existence
+      ansible.builtin.assert:
+        that: "'molecule' in groups"
+        fail_msg: |
+          molecule group was not found inside inventory groups: {{ groups }}
+
+- name: Verify
+  hosts: molecule
+  gather_facts: false
+  tasks:
+    - name: Get nginx version
+      ansible.builtin.command:
+        cmd: nginx -v
+      register: result
+      changed_when: false
+
+    - name: Check nginx version
+      ansible.builtin.assert:
+        that:
+          - result.stdout == "nginx version: nginx/1.20.1"
+
+    - name: Check nginx.conf is valid
+      ansible.builtin.command:
+        cmd: nginx -t
+      changed_when: false
+
+    - name: Check content is served on port 80
+      ansible.builtin.uri:
+        url: http://localhost/index.html
+        return_content: true
+      register: index_html
+
+    - name: Check index_html content
+      ansible.builtin.assert:
+        that:
+          - index_html.content == "Spotterlab.nginx sample content.\n"

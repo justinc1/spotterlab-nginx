@@ -1,0 +1,20 @@
+---
+# tasks file for nginx
+- name: Install nginx
+  ansible.builtin.package:
+    name:
+      - nginx
+    state: present
+
+- name: Setup html content
+  ansible.builtin.copy:
+    src: index.html
+    dest: /usr/share/testpage/index.html
+    mode: 755
+    owner: root
+    group: root
+
+- name: Start nginx
+  ansible.builtin.systemd_service:
+    state: started
+    name: nginx
